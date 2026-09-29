@@ -69,7 +69,7 @@ export default function Login({ state }) {
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 {isLoginState ? "Sign in to access your" : "Get started with"}{" "}
-                Rank Pilot
+                Rankify-AI
               </p>
             </div>
 
@@ -88,7 +88,7 @@ export default function Login({ state }) {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    placeholder="John Doe"
+                    placeholder="your name"
                     className="w-full pl-11 pr-4 py-3 rounded-xl bg-background/50 border border-border text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                   />
                 </div>
@@ -109,7 +109,7 @@ export default function Login({ state }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
+                  placeholder="your email"
                   className="w-full pl-11 pr-4 py-3 rounded-xl bg-background/50 border border-border text-foreground placeholder-muted-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-sm font-medium"
                 />
               </div>
