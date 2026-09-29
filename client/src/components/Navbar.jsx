@@ -13,9 +13,10 @@ import {
   ChartNoAxesColumnIcon,
 } from "lucide-react";
 import { useState } from "react";
+import { useApp } from "../context/AppContext";
 
 export default function Navbar() {
-  const [user, setUser] = useState(null);
+  const { user, logout } = useApp()
 
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleLogout = () => {
-    setUser(null);
+    logout()
     navigate("/");
   };
 

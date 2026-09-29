@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import {
   Mail,
   Lock,
@@ -7,6 +7,8 @@ import {
   ChartNoAxesColumnIcon,
   User2Icon,
 } from "lucide-react";
+import { useApp } from "../context/AppContext";
+import { toast } from "sonner";
 
 export default function Login({ state }) {
   const [isLoginState, setIsLoginState] = useState(state === "login");
@@ -14,6 +16,8 @@ export default function Login({ state }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { login, register } = useApp();
+  const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
@@ -21,10 +25,23 @@ export default function Login({ state }) {
     e.preventDefault();
     setLoading(true);
 
-    setTimeout(() => {
+    try {
+      if (isLoginState) {
+        await login(email, password);
+        toast.success("Logged in Successfully!");
+      } else {
+        await register(name, email, password);
+        toast.success("Account Created Successfully!");
+      }
+      const redirect = searchParams.get("redirect") || "/dashboard";
+      navigate(redirect);
+    } catch (error) {
+      console.log('Full Login error:', error)
+      const errorMsg = error.response?.data?.message || "Something went wrong";
+      toast.error(errorMsg);
+    } finally {
       setLoading(false);
-      navigate("/dashboard");
-    }, 1000);
+    }
   };
 
   return (
