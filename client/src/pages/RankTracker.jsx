@@ -84,6 +84,12 @@ export default function RankTracker() {
               );
             }
           } catch (error) {
+            // Stop polling if the item was deleted (404 Not Found)
+            if (error.response?.status === 404) {
+              clearInterval(pollInterval);
+              setRefreshing(null);
+              return;
+            }
             console.error("Polling error:", error);
           }
         }, 3000);
@@ -116,6 +122,12 @@ export default function RankTracker() {
             setRefreshing(null);
           }
         } catch (error) {
+          // Stop polling if the item was deleted (404 Not Found)
+          if (error.response?.status === 404) {
+            clearInterval(pollInterval);
+            setRefreshing(null);
+            return;
+          }
           console.error("Polling error:", error);
         }
       }, 3000);
@@ -130,25 +142,36 @@ export default function RankTracker() {
     setDeleting(id);
     try {
       await api.delete(`/rank/${id}`);
-      setKeywords((prev) => prev.filter((k) => k._id === id));
+      setKeywords((prev) => prev.filter((k) => k._id !== id));
     } catch (error) {
       console.error("Deleting failed:", error);
+    } finally {
+      setDeleting(null);
     }
-    setDeleting(null);
   };
 
   const handleToggle = async (id) => {
     try {
       const response = await api.put(`/rank/${id}/toggle`);
       if (response.data.success) {
+        // Fallback safely whether backend sends tracking, data, or just toggles it locally
+        const updatedActive =
+          response.data.tracking?.active ?? response.data.data?.active;
+
         setKeywords((prev) =>
           prev.map((k) =>
-            k._id === id ? { ...k, active: response.data.tracking.active } : k
+            k && k._id === id
+              ? {
+                  ...k,
+                  active:
+                    updatedActive !== undefined ? updatedActive : !k.active,
+                }
+              : k
           )
         );
       }
     } catch (error) {
-      console.error("Deleting failed:", error);
+      console.error("Toggle failed:", error);
     }
   };
 
