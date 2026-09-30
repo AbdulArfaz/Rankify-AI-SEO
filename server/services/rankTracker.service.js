@@ -33,7 +33,14 @@ export async function rankTracker(keyword, targetDomain) {
 
     let found = null;
     let allResults = [];
-    const cleanTarget = targetDomain.replace("www.", "").toLowerCase();
+    
+    // Safely clean and normalize the target domain (e.g., "https://www.wikipedia.org/wiki" -> "wikipedia.org")
+    let cleanTarget = targetDomain.trim().toLowerCase();
+    try {
+      if (!cleanTarget.startsWith("http")) cleanTarget = "https://" + cleanTarget;
+      cleanTarget = new URL(cleanTarget).hostname;
+    } catch {}
+    cleanTarget = cleanTarget.replace(/^www\./, "");
 
     for (let gPage = 0; gPage < 5; gPage++) {
       const startParam = gPage * 10;
@@ -80,14 +87,19 @@ export async function rankTracker(keyword, targetDomain) {
                   }
                 }
 
+                let domain = "";
+                try {
+                  domain = new URL(a.href).hostname.replace(/^www\./, "").toLowerCase();
+                } catch {}
+
                 return {
                   url: a.href,
-                  domain: new URL(a.href).hostname.replace("www.", ""),
+                  domain,
                   title: h3.innerText.trim(),
                   snippet: s.trim().substring(0, 300),
                 };
               })
-              .filter(Boolean);
+              .filter((r) => r && r.domain);
           });
 
           console.log(`Current Page Scanned: ${gPage + 1}`);
@@ -109,10 +121,10 @@ export async function rankTracker(keyword, targetDomain) {
         r.position = allResults.length + 1;
         allResults.push(r);
 
+        // Precise match: exact domain or subdomains (e.g. en.wikipedia.org matches wikipedia.org)
         if (
           !found &&
-          (r.domain.toLowerCase().includes(cleanTarget) ||
-            cleanTarget.includes(r.domain.toLowerCase()))
+          (r.domain === cleanTarget || r.domain.endsWith("." + cleanTarget))
         ) {
           found = { ...r, page: gPage + 1 };
         }
@@ -124,11 +136,12 @@ export async function rankTracker(keyword, targetDomain) {
 
     await browser.close();
 
+    // Ensure competitors strictly exclude the target domain
     const competitors = allResults
       .filter(
         (r) =>
-          !r.domain.toLowerCase().includes(cleanTarget) &&
-          !cleanTarget.includes(r.domain.toLowerCase())
+          r.domain !== cleanTarget &&
+          !r.domain.endsWith("." + cleanTarget)
       )
       .slice(0, 10);
 
