@@ -12,13 +12,13 @@ const [user, setUser] = useState(null)
 const [loading, setLoading] = useState(true)
 
 const api = axios.create({
-    baseURL: BACKEND_URL,
+    baseURL: `${BACKEND_URL}/api/v1`,
     withCredentials: true
 })
 
 const loadUser = async () => {
   try {
-    const response = await api.get('/api/v1/users/current-user'); 
+    const response = await api.get('/users/current-user'); 
     if (response.data.success) {
       setUser(response.data.data);
     }
@@ -39,7 +39,7 @@ loadUser()
 
 const login = async (email, password) => {
   try {
-    const response = await api.post('/api/v1/users/login', { email, password });    
+    const response = await api.post('/users/login', { email, password });    
     if (response.data.success) {
       setUser(response.data.data.user);
     }
@@ -52,7 +52,7 @@ const login = async (email, password) => {
 
 const register = async (name, email, password) => {
   try {
-    const response = await api.post('/api/v1/users/register', { name, email, password });
+    const response = await api.post('/users/register', { name, email, password });
     if (response.data.success) {
       setUser(response.data.data);
     }
@@ -65,7 +65,7 @@ const register = async (name, email, password) => {
 
 const logout = async () => {
   try {
-    const response = await api.post('/api/v1/users/logout');   
+    const response = await api.post('/users/logout');   
     if (response.data.success) {
       setUser(null);
     }
