@@ -54,7 +54,12 @@ export async function rankTracker(keyword, targetDomain) {
             return Array.from(items)
               .map((el) => {
                 const h3 = el.querySelector("h3");
-                const a = el.querySelector("a");
+                const a = h3
+                  ? h3.closest("a") ||
+                    el.querySelector(
+                      "a[href^='http']:not([href*='google.com'])"
+                    )
+                  : null;
 
                 if (!h3 || !a || !a.href) return null;
 
@@ -63,13 +68,14 @@ export async function rankTracker(keyword, targetDomain) {
                 for (let j = 0; j < 6 && c; j++, c = c.parentElement) {
                   const txt = c.innerText || "";
                   if (txt.length > h3.innerText.length + 50) {
-                    s = txt
-                      .split("\n")
-                      .find(
-                        (l) =>
-                          l.length > 30 &&
-                          !l.includes(h3.innerText.substring(0, 20))
-                      ) || "";
+                    s =
+                      txt
+                        .split("\n")
+                        .find(
+                          (l) =>
+                            l.length > 30 &&
+                            !l.includes(h3.innerText.substring(0, 20))
+                        ) || "";
                     if (s) break;
                   }
                 }
@@ -84,7 +90,7 @@ export async function rankTracker(keyword, targetDomain) {
               .filter(Boolean);
           });
 
-          console.log( `Current Page Scanned: ${gPage + 1}`);
+          console.log(`Current Page Scanned: ${gPage + 1}`);
           console.log(`Total Results Found on Page: ${pageResults.length}`);
 
           if (pageResults.length > 0) break;
@@ -118,11 +124,13 @@ export async function rankTracker(keyword, targetDomain) {
 
     await browser.close();
 
-    const competitors = allResults.filter(
-      (r) =>
-        !r.domain.toLowerCase().includes(cleanTarget) &&
-        !cleanTarget.includes(r.domain.toLowerCase())
-    ).slice(0, 10);
+    const competitors = allResults
+      .filter(
+        (r) =>
+          !r.domain.toLowerCase().includes(cleanTarget) &&
+          !cleanTarget.includes(r.domain.toLowerCase())
+      )
+      .slice(0, 10);
 
     return {
       success: true,
