@@ -84,7 +84,6 @@ export default function RankTracker() {
               );
             }
           } catch (error) {
-            // Stop polling if the item was deleted (404 Not Found)
             if (error.response?.status === 404) {
               clearInterval(pollInterval);
               setRefreshing(null);
@@ -154,7 +153,6 @@ export default function RankTracker() {
     try {
       const response = await api.put(`/rank/${id}/toggle`);
       if (response.data.success) {
-        // Fallback safely whether backend sends tracking, data, or just toggles it locally
         const updatedActive =
           response.data.tracking?.active ?? response.data.data?.active;
 

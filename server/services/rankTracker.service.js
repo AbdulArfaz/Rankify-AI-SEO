@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export async function rankTracker(keyword, targetDomain) {
-  console.log("🔥 SERPER API RANK TRACKER TRIGGERED FOR:", keyword, targetDomain);
+  console.log("SERPER API RANK TRACKER TRIGGERED FOR:", keyword, targetDomain);
 
   try {
     let cleanTarget = targetDomain.trim().toLowerCase();

@@ -17,8 +17,11 @@ import {
   Loader2,
 } from "lucide-react";
 import { dummyWebsiteRanking } from "../assets/assets";
+import { useApp } from "../context/AppContext.jsx";
 
 export default function RankDetail() {
+  const { api } = useApp();
+
   const { id } = useParams();
   const [tracking, setTracking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -27,19 +30,53 @@ export default function RankDetail() {
   const chartRef = useRef(null);
 
   const fetchTracking = async () => {
-    setTimeout(() => {
-      setTracking(dummyWebsiteRanking);
+    try {
+      const response = await api.get(`/rank/${id}`);
+
+      if (response.data.success) {
+        const trackingData = response.data.data;
+        setTracking(trackingData);
+
+        if (
+          trackingData.status === "pending" ||
+          trackingData.status === "in_progress"
+        ) {
+          setTimeout(fetchTracking, 3000);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch tracking details:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleRefresh = async () => {
     if (!tracking) return;
     setRefreshing(true);
-    setTimeout(() => {
-      setTracking(dummyWebsiteRanking);
+    try {
+      await api.post(`/rank/${tracking._id}/refresh-keyword`);
+      setTracking((prev) => (prev ? { ...prev, status: "checking" } : null));
+
+      const pollInterval = setInterval(async () => {
+        try {
+          const check = await api.get(`/rank/${tracking._id}`);
+
+          const updatedData = check.data.data;
+
+          if (updatedData && updatedData.status !== "checking") {
+            setTracking(updatedData);
+            setRefreshing(false);
+            clearInterval(pollInterval);
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }, 3000);
+    } catch (error) {
+      console.error(error);
       setRefreshing(false);
-    }, 1000);
+    }
   };
 
   const drawChart = () => {
@@ -111,7 +148,7 @@ export default function RankDetail() {
       ctx.fillText(
         `${date.getMonth() + 1}/${date.getDate()}`,
         x,
-        h - padding.bottom + 20,
+        h - padding.bottom + 20
       );
     }
 
@@ -135,7 +172,7 @@ export default function RankDetail() {
       0,
       padding.top,
       0,
-      h - padding.bottom,
+      h - padding.bottom
     );
 
     gradient.addColorStop(0, "rgba(59, 130, 246, 0.15)");
@@ -547,7 +584,7 @@ export default function RankDetail() {
                   {[...tracking.rankHistory]
                     .sort(
                       (a, b) =>
-                        new Date(b.date).getTime() - new Date(a.date).getTime(),
+                        new Date(b.date).getTime() - new Date(a.date).getTime()
                     )
                     .map((entry, i) => (
                       <div
