@@ -10,6 +10,7 @@ import {
   Loader2,
   ArrowRightIcon,
 } from "lucide-react";
+import { useApp } from "../context/AppContext";
 
 const STEPS = [
   {
@@ -35,6 +36,9 @@ const STEPS = [
 ];
 
 export default function Analyze() {
+
+  const { api } = useApp()
+
   const [url, setUrl] = useState("");
   const [analyzing, setAnalyzing] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
@@ -44,7 +48,8 @@ export default function Analyze() {
 
   const navigate = useNavigate();
 
-  const handleAnalyze = async (submitUrl) => {
+
+const handleAnalyze = async (submitUrl) => {
     const targetUrl = submitUrl || url;
     if (!targetUrl.trim()) return;
 
@@ -52,14 +57,60 @@ export default function Analyze() {
     setAnalyzing(true);
     setCurrentStep(0);
 
-    setTimeout(() => setCurrentStep(1), 1000);
-    setTimeout(() => setCurrentStep(2), 3000);
-    setTimeout(() => setCurrentStep(3), 6000);
-    setTimeout(() => {
+    try {
+      setCurrentStep(0);
+      const response = await api.post("/analysis/analyze", {
+        url: targetUrl.startsWith("http") ? targetUrl : `https://${targetUrl}`,
+      });
+      if (!response.data.success) {
+        throw new Error(response.data.message || "Failed to initiate analysis");
+      }
+
+      const id = response.data.data._id; 
+      setCurrentStep(1);
+
+      let attempts = 0;
+      const maxAttempts = 90;
+
+      pollRef.current = setInterval(async () => {
+        attempts++;
+        if (attempts > maxAttempts) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setError("Analysis timed out. Please try again later.");
+          setAnalyzing(false);
+          return;
+        }
+        try {
+          const check = await api.get(`/analysis/${id}`);
+          const analysis = check.data.data;
+          if (analysis?.status === "completed") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setCurrentStep(3);
+            setTimeout(() => {
+              navigate(`/report/${id}`);
+            }, 1000);
+          } else if (analysis?.status === "failed") {
+            if (pollRef.current) clearInterval(pollRef.current);
+            setError("Analysis failed. AI model might be down.");
+            setAnalyzing(false);
+          } else {
+            if (attempts > 5) {
+              setCurrentStep(2);
+            }
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 2000); 
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || err.message || "An error occurred while analyzing the website.");
       setAnalyzing(false);
-      navigate(`/report/id123`);
-    }, 8000);
+    }
   };
+
+
+
 
   const handleSubmit = (e) => {
     e.preventDefault();

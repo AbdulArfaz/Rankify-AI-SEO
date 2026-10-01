@@ -16,20 +16,40 @@ import {
   Type,
   Search,
 } from "lucide-react";
-import { dummyWebsiteAnalysis } from "../assets/assets";
+import { useApp } from "../context/AppContext";
+
 
 export default function Report() {
+
+  const { api } = useApp();
   const { id } = useParams();
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error] = useState("");
+  const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("overview");
 
-  const fetchAnalysis = async () => {
-    setTimeout(() => {
-      setAnalysis(dummyWebsiteAnalysis);
+const fetchAnalysis = async () => {
+    try {
+      const response = await api.get(`/analysis/${id}`);
+      if (response.data.success) {
+        if (response.data.data.status === "processing") {
+          setTimeout(fetchAnalysis, 2000); // Poll every 2 seconds
+          return;
+        }
+        setAnalysis(response.data.data);
+      } else {
+        setError(response.data.message || "Failed to fetch analysis.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "An error occurred while fetching the analysis."
+      );
+    } finally {
       setLoading(false);
-    }, 1500);
+    }
   };
 
   const getScoreClass = (s) => {
@@ -465,32 +485,32 @@ export default function Report() {
                 {[
                   {
                     label: "Title",
-                    value: analysis.metaData.title,
+                    value: analysis?.metaData?.title,
                     ideal: "50-60 characters",
-                    len: analysis.metaData.title.length,
+                    len: analysis?.metaData?.title.length,
                   },
                   {
                     label: "Description",
-                    value: analysis.metaData.description,
+                    value: analysis?.metaData?.description,
                     ideal: "150-160 characters",
-                    len: analysis.metaData.description.length,
+                    len: analysis?.metaData?.description.length,
                   },
                   {
                     label: "Canonical URL",
-                    value: analysis.metaData.canonical,
+                    value: analysis?.metaData?.canonical,
                   },
-                  { label: "Robots", value: analysis.metaData.robots },
-                  { label: "Viewport", value: analysis.metaData.viewport },
-                  { label: "Charset", value: analysis.metaData.charset },
-                  { label: "OG Title", value: analysis.metaData.ogTitle },
+                  { label: "Robots", value: analysis?.metaData?.robots },
+                  { label: "Viewport", value: analysis?.metaData?.viewport },
+                  { label: "Charset", value: analysis?.metaData?.charset },
+                  { label: "OG Title", value: analysis?.metaData?.ogTitle },
                   {
                     label: "OG Description",
-                    value: analysis.metaData.ogDescription,
+                    value: analysis?.metaData?.ogDescription,
                   },
-                  { label: "OG Image", value: analysis.metaData.ogImage },
+                  { label: "OG Image", value: analysis?.metaData?.ogImage },
                   {
                     label: "Twitter Card",
-                    value: analysis.metaData.twitterCard,
+                    value: analysis?.metaData?.twitterCard,
                   },
                 ].map((meta) => (
                   <div

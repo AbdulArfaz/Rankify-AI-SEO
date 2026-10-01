@@ -4,7 +4,7 @@ const issueSchema = new Schema({
     severity: {type:String, enum: ["critical", "warning", "info"], required: true},
     category: { type: String, required: true},
     message: { type: String, required: true},
-    recommedation: { type: String, required: true},
+    recommendation: { type: String, required: true},
 
 }, {_id: false})
 
@@ -42,12 +42,12 @@ const analysisSchema = new Schema({
         charset: {type: String, default: ""},
     },
     headings: {
-        h1: {type: NUmber, default: 0},
-        h2: {type: NUmber, default: 0},
-        h3: {type: NUmber, default: 0},
-        h4: {type: NUmber, default: 0},
-        h5: {type: NUmber, default: 0},
-        h6: {type: NUmber, default: 0},
+        h1: {type: Number, default: 0},
+        h2: {type: Number, default: 0},
+        h3: {type: Number, default: 0},
+        h4: {type: Number, default: 0},
+        h5: {type: Number, default: 0},
+        h6: {type: Number, default: 0},
         h1Texts: [String],
     },
     links: {

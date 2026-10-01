@@ -1,4 +1,4 @@
-import Analysis from "../models/analysis.model.js";
+import {Analysis} from "../models/analysis.model.js";
 import { scrapeUrl } from "../services/scraper.service.js";
 import { analyzeWithGemini } from "../services/gemini.service.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
