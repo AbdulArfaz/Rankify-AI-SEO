@@ -7,10 +7,10 @@ export async function scrapeUrl(url) {
     let targetUrl = url.trim();
     if (!targetUrl.startsWith("http")) targetUrl = "https://" + targetUrl;
 
-    // Fetch raw HTML using Axios with a standard browser User-Agent
     const response = await axios.get(targetUrl, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "User-Agent":
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
       },
       timeout: 30000,
     });
@@ -20,8 +20,6 @@ export async function scrapeUrl(url) {
     const html = response.data;
     const pageSize = html.length;
 
-
-    // Load HTML into Cheerio for fast DOM parsing
     const $ = cheerio.load(html);
 
     const getMeta = (name) => {
@@ -63,7 +61,13 @@ export async function scrapeUrl(url) {
 
     allLinks.each((_, el) => {
       const href = $(el).attr("href");
-      if (!href || href.startsWith("mailto:") || href.startsWith("tel:") || href.startsWith("#")) return;
+      if (
+        !href ||
+        href.startsWith("mailto:") ||
+        href.startsWith("tel:") ||
+        href.startsWith("#")
+      )
+        return;
       try {
         const linkUrl = new URL(href, targetUrl);
         if (linkUrl.hostname === currentHost) {
@@ -81,7 +85,6 @@ export async function scrapeUrl(url) {
       if (!alt || alt.trim() === "") missingAlt++;
     });
 
-    // Remove scripts and styles before extracting body text for accurate word count
     $("script, style, noscript").remove();
     const bodyText = $("body").text().replace(/\s+/g, " ").trim();
     const wordCount = bodyText ? bodyText.split(/\s+/).length : 0;
