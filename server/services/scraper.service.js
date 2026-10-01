@@ -20,6 +20,7 @@ export async function scrapeUrl(url) {
     const html = response.data;
     const pageSize = html.length;
 
+
     // Load HTML into Cheerio for fast DOM parsing
     const $ = cheerio.load(html);
 

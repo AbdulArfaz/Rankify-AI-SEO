@@ -21,10 +21,14 @@ export const seoAnalysisSchema = {
     headings: {
       type: "OBJECT",
       properties: {
-        h1Count: { type: "INTEGER" },
-        h2Count: { type: "INTEGER" },
-        h3Count: { type: "INTEGER" },
+        h1: { type: "INTEGER" },
+        h2: { type: "INTEGER" },
+        h3: { type: "INTEGER" },
+        h4: { type: "INTEGER" },
+        h5: { type: "INTEGER" },
+        h6: { type: "INTEGER" },
       },
+      required: ["h1", "h2", "h3", "h4", "h5", "h6"],
     },
     links: {
       type: "OBJECT",

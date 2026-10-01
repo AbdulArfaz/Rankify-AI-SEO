@@ -242,7 +242,7 @@ const fetchAnalysis = async () => {
                 </div>
                 <div className="bg-muted/30 border border-border rounded-xl p-3 text-center">
                   <p className="text-lg font-bold text-secondary">
-                    {Math.round(analysis.pageSize / 1024)}KB
+                    {(((analysis?.pageSize || 0) / 1024)).toFixed(1)}KB
                   </p>
                   <p className="text-[10px] text-muted-foreground">Page Size</p>
                 </div>
