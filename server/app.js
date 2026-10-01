@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import userRouter from "./routes/user.route.js";
 import rankRouter from "./routes/rank.route.js";
 import analysisRouter from "./routes/analysis.route.js";
+import { startRankTrackingCron } from "./cron/rankTracking.cron.js";
 
 const app = express();
 
@@ -18,6 +19,8 @@ app.use(cookieParser());
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/rank", rankRouter)
 app.use("/api/v1/analysis", analysisRouter);
+
+startRankTrackingCron()
 
 
 app.get("/", (req, res) => {
