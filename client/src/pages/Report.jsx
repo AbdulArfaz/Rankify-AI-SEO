@@ -33,7 +33,7 @@ const fetchAnalysis = async () => {
       const response = await api.get(`/analysis/${id}`);
       if (response.data.success) {
         if (response.data.data.status === "processing") {
-          setTimeout(fetchAnalysis, 2000); // Poll every 2 seconds
+          setTimeout(fetchAnalysis, 2000); 
           return;
         }
         setAnalysis(response.data.data);

@@ -20,7 +20,7 @@ export default function App() {
 
     return (
         <>
-            <Toaster position='top-right' richColors/>
+            <Toaster position='top-right' richColors toastOptions={{ style:{ marginTop: '40px'}, duration: 3000 }} />
             {!hideNavbar && <Navbar />}
             <Routes>
                 <Route path="/" element={<Home />} />

@@ -8,20 +8,27 @@ import {
   TrendingUpIcon,
 } from "lucide-react";
 import AnalysesCard from "../components/AnalysesCard";
-import { dummyAnalysisData } from "../assets/assets";
+import { useApp } from "../context/AppContext";
 
 export default function Dashboard() {
-  const user = { name: "James Arfaz", plan: "free", analysisCount: 2 };
+  const { user, api } = useApp();
+
   const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const fetchRecent = async () => {
-    setTimeout(() => {
-      setAnalyses(dummyAnalysisData);
+    try {
+      const response = await api.get("/analysis/list?page=1&limit=6");
+      if (response.data.success) {
+        setAnalyses(response.data.data.analyses);
+      }
+    } catch (error) {
+      console.error("Failed to fetch recent analyses:", error);
+    } finally {
       setLoading(false);
-    }, 1000);
+    }
   };
 
   const handleAnalyze = (e) => {
@@ -30,14 +37,14 @@ export default function Dashboard() {
       navigate(`/analyze?url=${encodeURIComponent(url)}`);
     }
   };
-
+ 
   const completedAnalyses = analyses.filter((a) => a.status === "completed");
   const avgScore = completedAnalyses.length
-    ? Math.round(
-        completedAnalyses.reduce((sum, a) => sum + a.overallScore, 0) /
-          completedAnalyses.length,
-      )
-    : 0;
+    ? (
+        completedAnalyses.reduce((sum, a) => sum + (a.overallScore || 0), 0) /
+        completedAnalyses.length
+      ).toFixed(1)
+    : "0";
 
   const getScoreClass = (s) => {
     if (s >= 80) return "score-good";
@@ -56,7 +63,7 @@ export default function Dashboard() {
           <h1 className="text-2xl sm:text-3xl font-bold text-foreground mb-1">
             Welcome back,{" "}
             <span className="text-transparent bg-clip-text bg-linear-to-r from-primary to-accent">
-              {user?.name}
+              {user.name}
             </span>
           </h1>
           <p className="text-muted-foreground text-sm italic">

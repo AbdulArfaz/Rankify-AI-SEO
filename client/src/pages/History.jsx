@@ -11,9 +11,12 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import ScoreGauge from "../components/ScoreGauge";
-import { dummyAnalysisData } from "../assets/assets";
+import { useApp } from "../context/AppContext";
 
 export default function History() {
+  
+  const { api } = useApp()
+
   const [analyses, setAnalyses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -25,19 +28,33 @@ export default function History() {
 
   const fetchAnalyses = async () => {
     setLoading(true);
-    setTimeout(() => {
-      setAnalyses(dummyAnalysisData);
-      setTotalPages(1);
+     try {
+        const response = await api.get(`/analysis/list?page=${page}&limit=10`);
+        if (response.data.success) {
+          setAnalyses(response.data.data.analyses);
+          setTotalPages(response.data.pagination?.totalPages || response.data.data.totalPages || 1);
+        }
+
+     } catch (error) { 
+      console.log("Failed to fetch:", error)
+     } finally {
       setLoading(false);
-    }, 1000);
+     }
   };
 
   const handleDelete = async (id) => {
     if (!confirm("Delete this analysis?")) return;
     setDeleting(id);
-    setTimeout(() => {
+    try {
+      const response = await api.delete(`/analysis/${id}`);
+      if (response.data.success) {
+        setAnalyses((prev) => prev.filter((a) => a._id !== id));
+      }
+    } catch (error) {
+      console.error("Failed to delete:", error);
+    } finally {
       setDeleting(null);
-    }, 1000);
+    }
   };
 
   const getScoreClass = (s) => {

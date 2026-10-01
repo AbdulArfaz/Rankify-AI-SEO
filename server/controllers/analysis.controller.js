@@ -110,7 +110,7 @@ export const getUserAnalyses = asyncHandler(async (req, res) => {
 
 // Delete analysis by ID
 export const deleteAnalysis = asyncHandler(async (req, res) => {
-  const analysis = await Analysis.findOneAndDelete({
+  const analysis = await Analysis.findByIdAndDelete({
     _id: req.params.id,
     userId: req.user._id,
   });
